@@ -52,6 +52,20 @@ class GameController extends ChangeNotifier {
   }
 
   PlayerHand get currentHand {
+    if (playerHands.isEmpty) {
+      return PlayerHand(
+        bet: currentBet,
+      );
+    }
+
+    if (currentHandIndex >= playerHands.length) {
+      currentHandIndex = playerHands.length - 1;
+    }
+
+    if (currentHandIndex < 0) {
+      currentHandIndex = 0;
+    }
+
     return playerHands[currentHandIndex];
   }
 
@@ -386,7 +400,6 @@ class GameController extends ChangeNotifier {
   }
 
   void settleBets() {
-    final totalWagered = playerHands.fold(0.0, (sum, hand) => sum + hand.bet);
     double totalPayout = 0;
 
     for (final hand in playerHands) {
@@ -404,8 +417,10 @@ class GameController extends ChangeNotifier {
       } else if (hand.value == dealerHand.value) {
         totalPayout += hand.bet;
       }
+      // Loss = no payout
     }
 
+    final totalWagered = playerHands.fold(0.0, (sum, hand) => sum + hand.bet);
     final totalProfit = totalPayout - totalWagered;
 
     bankroll += totalPayout;

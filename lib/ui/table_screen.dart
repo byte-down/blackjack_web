@@ -18,52 +18,6 @@ class TableScreen extends StatefulWidget {
 class _TableScreenState extends State<TableScreen> {
   final ScrollController playerScrollController = ScrollController();
 
-  Widget buildBetChip(
-    GameController controller,
-    double amount,
-    Color color,
-  ) {
-    final selected = controller.currentBet == amount;
-
-    return GestureDetector(
-      onTap: controller.isPlaying
-          ? null
-          : () {
-              controller.currentBet = amount;
-
-              controller.notifyListeners();
-            },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: selected ? 70 : 60,
-        height: selected ? 70 : 60,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-          border: Border.all(
-            color: selected ? Colors.amber : Colors.white,
-            width: 4,
-          ),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: selected ? 12 : 4,
-              color: Colors.black45,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            '\$${amount.toInt()}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget buildCards(List cards) {
     final width = 70 + ((cards.length - 1) * 28);
 
@@ -138,6 +92,13 @@ class _TableScreenState extends State<TableScreen> {
     final controller = context.watch<GameController>();
     scrollToActiveHand(controller);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final totalHandWidth = controller.playerHands.length * 180.0;
+
+    final containerWidth =
+        totalHandWidth < screenWidth ? screenWidth : totalHandWidth;
+
     return Scaffold(
       backgroundColor: Colors.green[900],
       body: SafeArea(
@@ -175,75 +136,117 @@ class _TableScreenState extends State<TableScreen> {
               ),
 
               // PLAYER HANDS
-
               SizedBox(
                 height: 180,
-                child: SingleChildScrollView(
-                  controller: playerScrollController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: SizedBox(
-                    width: controller.playerHands.length == 1
-                        ? MediaQuery.of(context).size.width
-                        : controller.playerHands.length * 180,
-                    child: Stack(
-                      children: List.generate(
-                        controller.playerHands.length,
-                        (handIndex) {
-                          final hand = controller.playerHands[handIndex];
+                child: controller.playerHands.length == 1
 
-                          return AnimatedPositioned(
-                            duration: const Duration(
-                              milliseconds: 500,
+                    // SINGLE HAND (PERFECTLY CENTERED)
+
+                    ? Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(
+                            milliseconds: 300,
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: controller.playerTurn
+                                  ? Colors.amber
+                                  : Colors.transparent,
+                              width: 4,
                             ),
-                            curve: Curves.easeOutCubic,
-                            left: controller.playerHands.length == 1
-                                ? (MediaQuery.of(context).size.width / 2) - 90
-                                : handIndex * 180,
-                            top: 0,
-                            child: AnimatedContainer(
-                              duration: const Duration(
-                                milliseconds: 300,
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: controller.playerTurn &&
-                                          handIndex ==
-                                              controller.currentHandIndex
-                                      ? Colors.amber
-                                      : Colors.transparent,
-                                  width: 4,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  16,
+                            borderRadius: BorderRadius.circular(
+                              16,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                controller.currentHand.displayValue,
+                                style: const TextStyle(
+                                  color: Colors.amber,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    hand.displayValue,
-                                    style: const TextStyle(
-                                      color: Colors.amber,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
+                              const SizedBox(
+                                height: 6,
+                              ),
+                              buildCards(
+                                controller.currentHand.cards,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+
+                    // MULTIPLE HANDS (SCROLLABLE)
+
+                    : SingleChildScrollView(
+                        controller: playerScrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: SizedBox(
+                          width: containerWidth,
+                          child: Stack(
+                            children: List.generate(
+                              controller.playerHands.length,
+                              (handIndex) {
+                                final hand = controller.playerHands[handIndex];
+
+                                return AnimatedPositioned(
+                                  duration: const Duration(
+                                    milliseconds: 500,
+                                  ),
+                                  curve: Curves.easeOutCubic,
+                                  left: totalHandWidth < screenWidth
+                                      ? ((screenWidth - totalHandWidth) / 2) +
+                                          (handIndex * 180)
+                                      : handIndex * 180,
+                                  top: 0,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(
+                                      milliseconds: 300,
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: controller.playerTurn &&
+                                                handIndex ==
+                                                    controller.currentHandIndex
+                                            ? Colors.amber
+                                            : Colors.transparent,
+                                        width: 4,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        16,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          hand.displayValue,
+                                          style: const TextStyle(
+                                            color: Colors.amber,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 6,
+                                        ),
+                                        buildCards(
+                                          hand.cards,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 6,
-                                  ),
-                                  buildCards(
-                                    hand.cards,
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
               ),
 
               // INFO BAR
@@ -417,7 +420,23 @@ class _TableScreenState extends State<TableScreen> {
         return;
       }
 
-      final targetOffset = controller.currentHandIndex * 180.0;
+      final handCount = controller.playerHands.length;
+
+      if (handCount <= 0) {
+        return;
+      }
+
+      final maxIndex = handCount - 1;
+
+      final safeIndex = controller.currentHandIndex < 0
+          ? 0
+          : controller.currentHandIndex > maxIndex
+              ? maxIndex
+              : controller.currentHandIndex;
+
+      final screenWidth = MediaQuery.of(context).size.width;
+
+      final targetOffset = (safeIndex * 180.0) - (screenWidth / 2) + 90;
 
       final maxScroll = playerScrollController.position.maxScrollExtent;
 
@@ -426,7 +445,9 @@ class _TableScreenState extends State<TableScreen> {
           0,
           maxScroll,
         ),
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(
+          milliseconds: 400,
+        ),
         curve: Curves.easeOutCubic,
       );
     });
