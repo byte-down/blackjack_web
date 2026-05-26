@@ -27,6 +27,23 @@ class Hand {
     return total;
   }
 
+  String get displayValue {
+
+    if (isBlackjack) {
+      return 'Blackjack';
+    }
+
+    if (isBust) {
+      return 'Bust';
+    }
+
+    if (isSoft) {
+      return 'Soft $value';
+    }
+
+    return value.toString();
+  }
+
   bool get isSoft {
     int total = 0;
     int aces = 0;
@@ -40,6 +57,15 @@ class Hand {
     }
 
     return aces > 0 && total <= 21;
+  }
+
+  bool get canSplit {
+
+    if (cards.length != 2) {
+      return false;
+    }
+
+    return cards[0].value == cards[1].value;
   }
 
   bool get isBust => value > 21;

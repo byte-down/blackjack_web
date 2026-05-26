@@ -14,7 +14,7 @@ class Shoe {
   void build() {
     cards.clear();
 
-    final suits = Suit.values;
+    const suits = Suit.values;
 
     final ranks = [
       '2', '3', '4', '5', '6',
