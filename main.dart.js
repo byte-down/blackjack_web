@@ -39726,7 +39726,6 @@ $1(a){var s,r,q,p,o=this.a,n=o.d,m=n.f
 if(m.length===0)return
 s=this.b
 r=s.c.length
-if(r===0)return
 if(r<=0)return
 q=r-1
 s=s.at
