@@ -18,6 +18,28 @@ class TableScreen extends StatefulWidget {
 class _TableScreenState extends State<TableScreen> {
   final ScrollController playerScrollController = ScrollController();
 
+  int previousHandIndex = -1;
+
+  ButtonStyle tableButtonStyle({
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    return ElevatedButton.styleFrom(
+      backgroundColor: backgroundColor ?? Colors.black,
+      foregroundColor: foregroundColor ?? Colors.amber,
+      padding: const EdgeInsets.symmetric(
+        vertical: 14,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30),
+      ),
+      textStyle: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
   Widget buildCards(List cards) {
     final width = 70 + ((cards.length - 1) * 28);
 
@@ -90,8 +112,10 @@ class _TableScreenState extends State<TableScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<GameController>();
-    scrollToActiveHand(controller);
-
+    if (controller.currentHandIndex != previousHandIndex) {
+      previousHandIndex = controller.currentHandIndex;
+      scrollToActiveHand(controller);
+    }
     final screenWidth = MediaQuery.of(context).size.width;
 
     final totalHandWidth = controller.playerHands.length * 180.0;
@@ -128,8 +152,14 @@ class _TableScreenState extends State<TableScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  CustomPaint(
+                    size: Size(
+                      MediaQuery.of(context).size.width,
+                      0,
+                    ),
+                    painter: TableArcPainter(),
+                  ),
                   // DEALER
-
                   Column(
                     children: [
                       Text(
@@ -281,11 +311,11 @@ class _TableScreenState extends State<TableScreen> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black26,
+                      color: Colors.black.withValues(alpha: 0.28),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           'Bankroll: \$${controller.bankroll.toStringAsFixed(0)}',
@@ -294,13 +324,13 @@ class _TableScreenState extends State<TableScreen> {
                             fontSize: 18,
                           ),
                         ),
-                        Text(
-                          'Hands: ${controller.handsPlayed}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
+                        // Text(
+                        //   'Hands: ${controller.handsPlayed}',
+                        //   style: const TextStyle(
+                        //     color: Colors.white,
+                        //     fontSize: 18,
+                        //   ),
+                        // ),
                         Text(
                           'Wager: \$${controller.totalWager.toStringAsFixed(0)}',
                           style: const TextStyle(
@@ -313,123 +343,173 @@ class _TableScreenState extends State<TableScreen> {
                     ),
                   ),
 
-                  // BETTING CONTROLS
+                  // CONTEXTUAL CONTROLS
 
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 140,
-                        child: TextField(
-                          controller: controller.betController,
-                          enabled: !controller.isPlaying,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.black26,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixText: '\$',
-                            prefixStyle: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          onChanged: controller.updateBet,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: controller.isPlaying
-                                ? null
-                                : controller.halveBet,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            child: const Text(
-                              '0.5x',
-                              style: TextStyle(
-                                color: Colors.white,
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: controller.isPlaying
+
+                        // =========================
+                        // IN HAND CONTROLS
+                        // =========================
+
+                        ? Column(
+                            key: const ValueKey('playing_controls'),
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        style: tableButtonStyle(),
+                                        onPressed: controller.playerTurn &&
+                                                controller
+                                                    .playerHands.isNotEmpty
+                                            ? () {
+                                                controller.hit();
+                                              }
+                                            : null,
+                                        child: const Text('Hit'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        style: tableButtonStyle(),
+                                        onPressed: controller.playerTurn &&
+                                                controller
+                                                    .playerHands.isNotEmpty
+                                            ? () {
+                                                controller.stand();
+                                              }
+                                            : null,
+                                        child: const Text('Stand'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: controller.isPlaying
-                                ? null
-                                : controller.doubleBet,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                            ),
-                            child: const Text(
-                              '2x',
-                              style: TextStyle(
-                                color: Colors.white,
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        style: tableButtonStyle(),
+                                        onPressed: controller.playerTurn &&
+                                                controller
+                                                    .playerHands.isNotEmpty &&
+                                                controller.currentHand.cards
+                                                        .length ==
+                                                    2
+                                            ? () {
+                                                controller.doubleDown();
+                                              }
+                                            : null,
+                                        child: const Text('Double'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        style: tableButtonStyle(),
+                                        onPressed: controller.playerTurn &&
+                                                controller
+                                                    .playerHands.isNotEmpty &&
+                                                controller.currentHand.canSplit
+                                            ? () {
+                                                controller.split();
+                                              }
+                                            : null,
+                                        child: const Text('Split'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
+                          )
+
+                        // =========================
+                        // PRE HAND BETTING
+                        // =========================
+
+                        : Column(
+                            key: const ValueKey('betting_controls'),
+                            children: [
+                              SizedBox(
+                                width: 140,
+                                child: TextField(
+                                  controller: controller.betController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                  ),
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.black26,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    prefixText: '\$',
+                                    prefixStyle: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  onChanged: controller.updateBet,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: controller.halveBet,
+                                        style: tableButtonStyle(
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: const Text('0.5x'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          controller.startHand();
+                                        },
+                                        style: tableButtonStyle(
+                                          backgroundColor: Colors.green[700],
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: const Text('Deal'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: controller.doubleBet,
+                                        style: tableButtonStyle(
+                                          backgroundColor: Colors.black,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: const Text('2x'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // ACTION BUTTONS
-
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: controller.isPlaying
-                            ? null
-                            : () {
-                                controller.startHand();
-                              },
-                        child: const Text('Deal'),
-                      ),
-                      ElevatedButton(
-                        onPressed: controller.playerTurn
-                            ? () {
-                                controller.hit();
-                              }
-                            : null,
-                        child: const Text('Hit'),
-                      ),
-                      ElevatedButton(
-                        onPressed: controller.playerTurn
-                            ? () {
-                                controller.stand();
-                              }
-                            : null,
-                        child: const Text('Stand'),
-                      ),
-                      ElevatedButton(
-                        onPressed: controller.playerTurn &&
-                                controller.currentHand.cards.length == 2
-                            ? () {
-                                controller.doubleDown();
-                              }
-                            : null,
-                        child: const Text('Double'),
-                      ),
-                      ElevatedButton(
-                        onPressed: controller.playerTurn &&
-                                controller.currentHand.canSplit
-                            ? () {
-                                controller.split();
-                              }
-                            : null,
-                        child: const Text('Split'),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -479,5 +559,40 @@ class _TableScreenState extends State<TableScreen> {
         curve: Curves.easeOutCubic,
       );
     });
+  }
+}
+
+class TableArcPainter extends CustomPainter {
+  @override
+  void paint(
+    Canvas canvas,
+    Size size,
+  ) {
+    final paint = Paint()
+      ..color = Colors.amber.withValues(alpha: 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
+
+    final rect = Rect.fromLTWH(
+      40,
+      -140,
+      size.width - 80,
+      280,
+    );
+
+    canvas.drawArc(
+      rect,
+      0.2,
+      2.75,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(
+    CustomPainter oldDelegate,
+  ) {
+    return false;
   }
 }

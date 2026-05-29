@@ -21,7 +21,7 @@ class GameController extends ChangeNotifier {
 
   String status = 'Press Deal';
 
-  double bankroll = 0;
+  double bankroll = 100;
 
   double currentBet = 10;
 
