@@ -100,314 +100,342 @@ class _TableScreenState extends State<TableScreen> {
         totalHandWidth < screenWidth ? screenWidth : totalHandWidth;
 
     return Scaffold(
-      backgroundColor: Colors.green[900],
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // DEALER
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // FELT BACKGROUND
 
-              Column(
+          Positioned.fill(
+            child: Image.asset(
+              'assets/table/felt.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // DARK OVERLAY
+
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.05),
+            ),
+          ),
+
+          // TABLE CONTENT
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // DEALER
+
+                  Column(
+                    children: [
+                      Text(
+                        controller.dealerDisplayValue,
+                        style: const TextStyle(
+                          color: Colors.amber,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      buildDealerCards(controller),
+                    ],
+                  ),
+
+                  // STATUS
+
                   Text(
-                    controller.dealerDisplayValue,
+                    controller.status,
                     style: const TextStyle(
-                      color: Colors.amber,
+                      color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  buildDealerCards(controller),
-                ],
-              ),
 
-              // STATUS
+                  // PLAYER HANDS
+                  SizedBox(
+                    height: 180,
+                    child: controller.playerHands.length == 1
 
-              Text(
-                controller.status,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                        // SINGLE HAND (PERFECTLY CENTERED)
 
-              // PLAYER HANDS
-              SizedBox(
-                height: 180,
-                child: controller.playerHands.length == 1
-
-                    // SINGLE HAND (PERFECTLY CENTERED)
-
-                    ? Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(
-                            milliseconds: 300,
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: controller.playerTurn
-                                  ? Colors.amber
-                                  : Colors.transparent,
-                              width: 4,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              16,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                controller.currentHand.displayValue,
-                                style: const TextStyle(
-                                  color: Colors.amber,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                        ? Center(
+                            child: AnimatedContainer(
+                              duration: const Duration(
+                                milliseconds: 300,
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: controller.playerTurn
+                                      ? Colors.amber
+                                      : Colors.transparent,
+                                  width: 4,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  16,
                                 ),
                               ),
-                              const SizedBox(
-                                height: 6,
-                              ),
-                              buildCards(
-                                controller.currentHand.cards,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-
-                    // MULTIPLE HANDS (SCROLLABLE)
-
-                    : SingleChildScrollView(
-                        controller: playerScrollController,
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: SizedBox(
-                          width: containerWidth,
-                          child: Stack(
-                            children: List.generate(
-                              controller.playerHands.length,
-                              (handIndex) {
-                                final hand = controller.playerHands[handIndex];
-
-                                return AnimatedPositioned(
-                                  duration: const Duration(
-                                    milliseconds: 500,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    controller.currentHand.displayValue,
+                                    style: const TextStyle(
+                                      color: Colors.amber,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  curve: Curves.easeOutCubic,
-                                  left: totalHandWidth < screenWidth
-                                      ? ((screenWidth - totalHandWidth) / 2) +
-                                          (handIndex * 180)
-                                      : handIndex * 180,
-                                  top: 0,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: controller.playerTurn &&
-                                                handIndex ==
-                                                    controller.currentHandIndex
-                                            ? Colors.amber
-                                            : Colors.transparent,
-                                        width: 4,
+                                  const SizedBox(
+                                    height: 6,
+                                  ),
+                                  buildCards(
+                                    controller.currentHand.cards,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+
+                        // MULTIPLE HANDS (SCROLLABLE)
+
+                        : SingleChildScrollView(
+                            controller: playerScrollController,
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: SizedBox(
+                              width: containerWidth,
+                              child: Stack(
+                                children: List.generate(
+                                  controller.playerHands.length,
+                                  (handIndex) {
+                                    final hand =
+                                        controller.playerHands[handIndex];
+
+                                    return AnimatedPositioned(
+                                      duration: const Duration(
+                                        milliseconds: 500,
                                       ),
-                                      borderRadius: BorderRadius.circular(
-                                        16,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          hand.displayValue,
-                                          style: const TextStyle(
-                                            color: Colors.amber,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
+                                      curve: Curves.easeOutCubic,
+                                      left: totalHandWidth < screenWidth
+                                          ? ((screenWidth - totalHandWidth) /
+                                                  2) +
+                                              (handIndex * 180)
+                                          : handIndex * 180,
+                                      top: 0,
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: controller.playerTurn &&
+                                                    handIndex ==
+                                                        controller
+                                                            .currentHandIndex
+                                                ? Colors.amber
+                                                : Colors.transparent,
+                                            width: 4,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            16,
                                           ),
                                         ),
-                                        const SizedBox(
-                                          height: 6,
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              hand.displayValue,
+                                              style: const TextStyle(
+                                                color: Colors.amber,
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 6,
+                                            ),
+                                            buildCards(
+                                              hand.cards,
+                                            ),
+                                          ],
                                         ),
-                                        buildCards(
-                                          hand.cards,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-              ),
+                  ),
 
-              // INFO BAR
+                  // INFO BAR
 
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      'Bankroll: \$${controller.bankroll.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
                     ),
-                    Text(
-                      'Hands: ${controller.handsPlayed}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    Text(
-                      'Wager: \$${controller.totalWager.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // BETTING CONTROLS
-
-              Column(
-                children: [
-                  SizedBox(
-                    width: 140,
-                    child: TextField(
-                      controller: controller.betController,
-                      enabled: !controller.isPlaying,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                      ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.black26,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          'Bankroll: \$${controller.bankroll.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                         ),
-                        prefixText: '\$',
-                        prefixStyle: const TextStyle(
-                          color: Colors.white,
+                        Text(
+                          'Hands: ${controller.handsPlayed}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                         ),
-                      ),
-                      onChanged: controller.updateBet,
+                        Text(
+                          'Wager: \$${controller.totalWager.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: Colors.amber,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+
+                  // BETTING CONTROLS
+
+                  Column(
                     children: [
-                      ElevatedButton(
-                        onPressed:
-                            controller.isPlaying ? null : controller.halveBet,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                        ),
-                        child: const Text(
-                          '0.5x',
-                          style: TextStyle(
+                      SizedBox(
+                        width: 140,
+                        child: TextField(
+                          controller: controller.betController,
+                          enabled: !controller.isPlaying,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
                             color: Colors.white,
+                            fontSize: 24,
                           ),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.black26,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixText: '\$',
+                            prefixStyle: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          onChanged: controller.updateBet,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed:
-                            controller.isPlaying ? null : controller.doubleBet,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                        ),
-                        child: const Text(
-                          '2x',
-                          style: TextStyle(
-                            color: Colors.white,
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: controller.isPlaying
+                                ? null
+                                : controller.halveBet,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Text(
+                              '0.5x',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: controller.isPlaying
+                                ? null
+                                : controller.doubleBet,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                            ),
+                            child: const Text(
+                              '2x',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  // ACTION BUTTONS
+
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: controller.isPlaying
+                            ? null
+                            : () {
+                                controller.startHand();
+                              },
+                        child: const Text('Deal'),
+                      ),
+                      ElevatedButton(
+                        onPressed: controller.playerTurn
+                            ? () {
+                                controller.hit();
+                              }
+                            : null,
+                        child: const Text('Hit'),
+                      ),
+                      ElevatedButton(
+                        onPressed: controller.playerTurn
+                            ? () {
+                                controller.stand();
+                              }
+                            : null,
+                        child: const Text('Stand'),
+                      ),
+                      ElevatedButton(
+                        onPressed: controller.playerTurn &&
+                                controller.currentHand.cards.length == 2
+                            ? () {
+                                controller.doubleDown();
+                              }
+                            : null,
+                        child: const Text('Double'),
+                      ),
+                      ElevatedButton(
+                        onPressed: controller.playerTurn &&
+                                controller.currentHand.canSplit
+                            ? () {
+                                controller.split();
+                              }
+                            : null,
+                        child: const Text('Split'),
                       ),
                     ],
                   ),
                 ],
               ),
-
-              // ACTION BUTTONS
-
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                alignment: WrapAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: controller.isPlaying
-                        ? null
-                        : () {
-                            controller.startHand();
-                          },
-                    child: const Text('Deal'),
-                  ),
-                  ElevatedButton(
-                    onPressed: controller.playerTurn
-                        ? () {
-                            controller.hit();
-                          }
-                        : null,
-                    child: const Text('Hit'),
-                  ),
-                  ElevatedButton(
-                    onPressed: controller.playerTurn
-                        ? () {
-                            controller.stand();
-                          }
-                        : null,
-                    child: const Text('Stand'),
-                  ),
-                  ElevatedButton(
-                    onPressed: controller.playerTurn &&
-                            controller.currentHand.cards.length == 2
-                        ? () {
-                            controller.doubleDown();
-                          }
-                        : null,
-                    child: const Text('Double'),
-                  ),
-                  ElevatedButton(
-                    onPressed:
-                        controller.playerTurn && controller.currentHand.canSplit
-                            ? () {
-                                controller.split();
-                              }
-                            : null,
-                    child: const Text('Split'),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
