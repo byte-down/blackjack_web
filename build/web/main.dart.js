@@ -39599,7 +39599,7 @@ r=c.c.length*180
 q=r<s?s:r
 p=A.amg(0,A.alS("assets/table/felt.png",B.zg,d,d))
 o=A.amg(0,A.FL(d,d,B.S,B.l.tn(0.05),d,d,d,d,d,d,d,d,d))
-n=A.jj(d,d,d,new A.KA(d),B.M7)
+n=A.jj(d,d,d,new A.KA(d),B.M8)
 m=t.J
 l=A.mV(A.d([A.f7(c.gaey(),d,d,d,B.O4,d,d),B.Mc,e.acE(c)],m),B.aR,d,B.bf,B.c7)
 k=A.f7(c.e,d,d,d,B.Ot,d,d)
@@ -40872,7 +40872,7 @@ r=A.xx(B.Ij,B.h,r==null?1:r)
 r.toString
 q=p.aa(q.gp())
 if(q==null)q=1
-return A.as1(A.ara(null,B.S,new A.qE(q,B.EW,new A.cY(B.z4,this.e)),s,1,B.M8),r)}}
+return A.as1(A.ara(null,B.S,new A.qE(q,B.EW,new A.cY(B.z4,this.e)),s,1,B.M7),r)}}
 A.DF.prototype={
 l(){var s=this,r=s.bD$
 if(r!=null)r.I(s.ghZ())
@@ -83053,8 +83053,8 @@ B.xD=new A.C(1,-1)
 B.M2=new A.C(22,22)
 B.M4=new A.C(48,36)
 B.M5=new A.C(48,48)
-B.M7=new A.C(1/0,120)
-B.M8=new A.C(80,47.5)
+B.M7=new A.C(80,47.5)
+B.M8=new A.C(1/0,0)
 B.xE=new A.C(-1,1)
 B.xF=new A.C(-1,-1)
 B.M9=new A.C(77.37,37.9)
