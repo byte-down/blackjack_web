@@ -8,6 +8,8 @@ import '../widgets/card_widget.dart';
 
 import '../widgets/animated_playing_card.dart';
 
+import '../widgets/dealer_animation.dart';
+
 class TableScreen extends StatefulWidget {
   const TableScreen({super.key});
 
@@ -152,13 +154,16 @@ class _TableScreenState extends State<TableScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  CustomPaint(
-                    size: Size(
-                      MediaQuery.of(context).size.width,
-                      0,
-                    ),
-                    painter: TableArcPainter(),
+                  DealerAnimation(
+                    state: controller.dealerAnimationState,
                   ),
+                  // CustomPaint(
+                  //   size: Size(
+                  //     MediaQuery.of(context).size.width,
+                  //     0,
+                  //   ),
+                  //   painter: TableArcPainter(),
+                  // ),
                   // DEALER
                   Column(
                     children: [
@@ -356,9 +361,7 @@ class _TableScreenState extends State<TableScreen> {
                         ? Column(
                             key: const ValueKey('playing_controls'),
                             children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Row(
+                              Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Expanded(
@@ -390,11 +393,8 @@ class _TableScreenState extends State<TableScreen> {
                                     ),
                                   ],
                                 ),
-                              ),
                               const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: Row(
+                              Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Expanded(
@@ -430,7 +430,7 @@ class _TableScreenState extends State<TableScreen> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              
                             ],
                           )
 

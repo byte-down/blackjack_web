@@ -7,6 +7,7 @@ import '../engine/blackjack_game.dart';
 import '../models/hand.dart';
 import '../models/player_hand.dart';
 import '../models/shoe.dart';
+import '../models/dealer_animation_state.dart';
 
 import '../strategies/basic_strategy.dart';
 
@@ -18,6 +19,8 @@ class GameController extends ChangeNotifier {
   List<PlayerHand> playerHands = [];
 
   Hand dealerHand = Hand();
+
+  DealerAnimationState dealerAnimationState = DealerAnimationState.idle;
 
   String status = 'Press Deal';
 
@@ -49,6 +52,13 @@ class GameController extends ChangeNotifier {
       strategy: BasicStrategy(),
       hitSoft17: true,
     );
+  }
+
+  void setDealerState(
+    DealerAnimationState state,
+  ) {
+    dealerAnimationState = state;
+    notifyListeners();
   }
 
   PlayerHand get currentHand {
@@ -101,6 +111,9 @@ class GameController extends ChangeNotifier {
       const Duration(milliseconds: 500),
     );
 
+    setDealerState(
+      DealerAnimationState.dealPlayer,
+    );
     // Initial Deal
 
     playerHands.first.addCard(shoe.deal());
@@ -135,6 +148,9 @@ class GameController extends ChangeNotifier {
       const Duration(milliseconds: 500),
     );
 
+    setDealerState(
+      DealerAnimationState.idle,
+    );
     // Blackjack checks
 
     // Dealer Peek Logic
@@ -196,12 +212,20 @@ class GameController extends ChangeNotifier {
   Future<void> hit() async {
     if (!playerTurn) return;
 
+    setDealerState(
+      DealerAnimationState.dealPlayer,
+    );
+
     currentHand.addCard(shoe.deal());
 
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 300),
+      const Duration(milliseconds: 700),
+    );
+
+    setDealerState(
+      DealerAnimationState.idle,
     );
 
     if (currentHand.isBust) {
@@ -257,6 +281,10 @@ class GameController extends ChangeNotifier {
       return;
     }
 
+    setDealerState(
+      DealerAnimationState.dealPlayer,
+    );
+
     final additionalBet = currentHand.bet;
     currentHand.doubleDown();
     bankroll -= additionalBet;
@@ -269,6 +297,10 @@ class GameController extends ChangeNotifier {
 
     await Future.delayed(
       const Duration(milliseconds: 700),
+    );
+
+    setDealerState(
+      DealerAnimationState.idle,
     );
 
     currentHand.finished = true;
