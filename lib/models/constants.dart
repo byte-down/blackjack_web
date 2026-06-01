@@ -1,0 +1,1 @@
+const int dealerAnimationFrameDuration = 200;

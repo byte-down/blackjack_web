@@ -8,6 +8,8 @@ import '../models/hand.dart';
 import '../models/player_hand.dart';
 import '../models/shoe.dart';
 import '../models/dealer_animation_state.dart';
+import '../models/constants.dart';
+
 
 import '../strategies/basic_strategy.dart';
 
@@ -44,8 +46,16 @@ class GameController extends ChangeNotifier {
 
   int currentHandIndex = 0;
 
+  static const int standardDelay = 500;
+
+  static const int fullAnimationDelay = dealerAnimationFrameDuration * 6;
+
+  static const int halfAnimationDelay = fullAnimationDelay ~/ 2;
+
+  static const int firstDealDelay = fullAnimationDelay ~/ 4;
+
   GameController() {
-    shoe = Shoe(decks: 6);
+    shoe = Shoe(decks: 8);
 
     game = BlackjackGame(
       shoe: shoe,
@@ -108,13 +118,14 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: firstDealDelay),
     );
+
+    // Initial Deal
 
     setDealerState(
       DealerAnimationState.dealPlayer,
     );
-    // Initial Deal
 
     playerHands.first.addCard(shoe.deal());
 
@@ -145,7 +156,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: 400),
     );
 
     setDealerState(
@@ -221,7 +232,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 700),
+      const Duration(milliseconds: halfAnimationDelay),
     );
 
     setDealerState(
@@ -236,7 +247,7 @@ class GameController extends ChangeNotifier {
       notifyListeners();
 
       await Future.delayed(
-        const Duration(milliseconds: 700),
+        const Duration(milliseconds: standardDelay),
       );
 
       await nextHand();
@@ -251,7 +262,7 @@ class GameController extends ChangeNotifier {
       notifyListeners();
 
       await Future.delayed(
-        const Duration(milliseconds: 700),
+        const Duration(milliseconds: standardDelay),
       );
 
       await nextHand();
@@ -268,7 +279,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 400),
+      const Duration(milliseconds: standardDelay),
     );
 
     await nextHand();
@@ -296,7 +307,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 700),
+      const Duration(milliseconds: halfAnimationDelay),
     );
 
     setDealerState(
@@ -312,7 +323,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: standardDelay),
     );
 
     await nextHand();
@@ -346,7 +357,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 700),
+      const Duration(milliseconds: standardDelay),
     );
 
     if (currentHand.value == 21) {
@@ -401,27 +412,36 @@ class GameController extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(
-      const Duration(milliseconds: 700),
+      const Duration(milliseconds: standardDelay),
     );
 
     while (true) {
       final total = dealerHand.value;
 
       if (total < 17) {
-        dealerHand.addCard(shoe.deal());
-
-        notifyListeners();
-
-        await Future.delayed(
-          const Duration(milliseconds: 600),
+        setDealerState(
+          DealerAnimationState.dealPlayer,
         );
-      } else if (total == 17 && dealerHand.isSoft && game.hitSoft17) {
-        dealerHand.addCard(shoe.deal());
-
-        notifyListeners();
-
         await Future.delayed(
-          const Duration(milliseconds: 600),
+          const Duration(milliseconds: halfAnimationDelay),
+        );
+        dealerHand.addCard(shoe.deal());
+        notifyListeners();
+        setDealerState(
+          DealerAnimationState.idle,
+        );
+
+      } else if (total == 17 && dealerHand.isSoft && game.hitSoft17) {
+        setDealerState(
+          DealerAnimationState.dealPlayer,
+        );
+        await Future.delayed(
+          const Duration(milliseconds: halfAnimationDelay),
+        );
+        dealerHand.addCard(shoe.deal());
+        notifyListeners();
+        setDealerState(
+          DealerAnimationState.idle,
         );
       } else {
         break;

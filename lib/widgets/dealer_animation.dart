@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../models/dealer_animation_state.dart';
 
+import '../models/constants.dart';
+
 class DealerAnimation extends StatefulWidget {
   final DealerAnimationState state;
 
@@ -32,7 +34,7 @@ class _DealerAnimationState
     loadFrames();
 
     timer = Timer.periodic(
-      const Duration(milliseconds: 240),
+      const Duration(milliseconds: dealerAnimationFrameDuration),
       (_) {
         if (!mounted) return;
 

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'card_model.dart';
 
+import '../services/sound_service.dart';
+
 class Shoe {
   final int decks;
   final List<PlayingCard> cards = [];
@@ -41,11 +43,12 @@ class Shoe {
   }
 
   PlayingCard deal() {
-    if (cards.length < 52) {
+    if (cards.length < 104) {
       build();
       shuffle();
     }
 
+    SoundService.instance.playCardDeal();
     return cards.removeLast();
   }
 }
